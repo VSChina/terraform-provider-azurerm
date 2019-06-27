@@ -177,6 +177,7 @@ type ArmClient struct {
 	batchAccountClient     batch.AccountClient
 	batchCertificateClient batch.CertificateClient
 	batchPoolClient        batch.PoolClient
+	applicationClient      batch.ApplicationClient
 
 	// Compute
 	availSetClient             compute.AvailabilitySetsClient
@@ -611,6 +612,10 @@ func (c *ArmClient) registerBatchClients(endpoint, subscriptionId string, auth a
 	batchPool := batch.NewPoolClientWithBaseURI(endpoint, subscriptionId)
 	c.configureClient(&batchPool.Client, auth)
 	c.batchPoolClient = batchPool
+
+	batchApplication := batch.NewApplicationClientWithBaseURI(endpoint, subscriptionId)
+	c.configureClient(&batchApplication.Client, auth)
+	c.applicationClient = batchApplication
 }
 
 func (c *ArmClient) registerCDNClients(endpoint, subscriptionId string, auth autorest.Authorizer) {
