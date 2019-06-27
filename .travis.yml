@@ -8,9 +8,10 @@ go:
 
 env:
   matrix:
+  - MODE=build
   - MODE=unit-tests
-  - MODE=linters
-  - MODE=website
+  #- MODE=linters
+  #- MODE=website
 
 install:
 # This script is used by the Travis build to install a cookie for
@@ -21,6 +22,7 @@ install:
 - make tools
 
 script:
+  - if [[ $MODE == 'build' ]]; then make build; fi
   - if [[ $MODE == 'unit-tests' ]]; then make test; fi
   - if [[ $MODE == 'linters' ]]; then GOGC=30 make lint; fi
   - if [[ $MODE == 'website' ]]; then make website-test; fi
