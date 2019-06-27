@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
@@ -41,7 +42,7 @@ func resourceArmBatchApplication() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"resource_group_name": resourceGroupNameSchema(),
+			"resource_group_name": azure.SchemaResourceGroupNameDiffSuppress(),
 
 			"account_name": {
 				Type:     schema.TypeString,
@@ -92,14 +93,14 @@ func resourceArmBatchApplicationCreate(d *schema.ResourceData, meta interface{})
 	displayName := d.Get("display_name").(string)
 
 	parameters := batch.Application{
-		Properties: &batch.ApplicationProperties{
+		ApplicationProperties: &batch.ApplicationProperties{
 			AllowUpdates:   utils.Bool(allowUpdates),
 			DefaultVersion: utils.String(defaultVersion),
 			DisplayName:    utils.String(displayName),
 		},
 	}
 
-	if _, err := client.Create(ctx, resourceGroup, accountName, name, parameters); err != nil {
+	if _, err := client.Create(ctx, resourceGroup, accountName, name, &parameters); err != nil {
 		return fmt.Errorf("Error creating Batch Application %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
 	}
 
@@ -140,10 +141,10 @@ func resourceArmBatchApplicationRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("name", name)
 	d.Set("resource_group_name", resourceGroup)
 	d.Set("account_name", accountName)
-	if properties := resp.Properties; properties != nil {
-		d.Set("allow_updates", properties.AllowUpdates)
-		d.Set("default_version", properties.DefaultVersion)
-		d.Set("display_name", properties.DisplayName)
+	if applicationProperties := resp.ApplicationProperties; applicationProperties != nil {
+		d.Set("allow_updates", applicationProperties.AllowUpdates)
+		d.Set("default_version", applicationProperties.DefaultVersion)
+		d.Set("display_name", applicationProperties.DisplayName)
 	}
 
 	return nil
@@ -161,7 +162,7 @@ func resourceArmBatchApplicationUpdate(d *schema.ResourceData, meta interface{})
 	displayName := d.Get("display_name").(string)
 
 	parameters := batch.Application{
-		Properties: &batch.ApplicationProperties{
+		ApplicationProperties: &batch.ApplicationProperties{
 			AllowUpdates:   utils.Bool(allowUpdates),
 			DefaultVersion: utils.String(defaultVersion),
 			DisplayName:    utils.String(displayName),
