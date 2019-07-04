@@ -43,7 +43,7 @@ func resourceArmBatchApplication() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"resource_group": azure.SchemaResourceGroupNameDiffSuppress(),
+			"resource_group_name": azure.SchemaResourceGroupNameDiffSuppress(),
 
 			"account_name": {
 				Type:     schema.TypeString,
@@ -65,11 +65,6 @@ func resourceArmBatchApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
-			"etag": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -79,7 +74,7 @@ func resourceArmBatchApplicationCreate(d *schema.ResourceData, meta interface{})
 	ctx := meta.(*ArmClient).StopContext
 
 	name := d.Get("name").(string)
-	resourceGroup := d.Get("resource_group").(string)
+	resourceGroup := d.Get("resource_group_name").(string)
 	accountName := d.Get("account_name").(string)
 
 	if requireResourcesToBeImported {
@@ -106,7 +101,7 @@ func resourceArmBatchApplicationCreate(d *schema.ResourceData, meta interface{})
 		},
 	}
 
-	if _, err := client.Create(ctx, resourceGroup, accountName, name, parameters); err != nil {
+	if _, err := client.Create(ctx, resourceGroup, accountName, name, &parameters); err != nil {
 		return fmt.Errorf("Error creating Batch Application %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
 	}
 
@@ -145,14 +140,13 @@ func resourceArmBatchApplicationRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	d.Set("name", name)
-	d.Set("resource_group", resourceGroup)
+	d.Set("resource_group_name", resourceGroup)
 	d.Set("account_name", accountName)
 	if applicationProperties := resp.ApplicationProperties; applicationProperties != nil {
 		d.Set("allow_updates", applicationProperties.AllowUpdates)
 		d.Set("default_version", applicationProperties.DefaultVersion)
 		d.Set("display_name", applicationProperties.DisplayName)
 	}
-	d.Set("etag", resp.Etag)
 
 	return nil
 }
@@ -162,7 +156,7 @@ func resourceArmBatchApplicationUpdate(d *schema.ResourceData, meta interface{})
 	ctx := meta.(*ArmClient).StopContext
 
 	name := d.Get("name").(string)
-	resourceGroup := d.Get("resource_group").(string)
+	resourceGroup := d.Get("resource_group_name").(string)
 	accountName := d.Get("account_name").(string)
 	allowUpdates := d.Get("allow_updates").(bool)
 	defaultVersion := d.Get("default_version").(string)
