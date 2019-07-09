@@ -54,6 +54,7 @@ func resourceArmBatchApplication() *schema.Resource {
 			"allow_updates": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Default:  true,
 			},
 
 			"default_version": {

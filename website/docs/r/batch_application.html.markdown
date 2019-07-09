@@ -65,7 +65,7 @@ The following arguments are supported:
 
 * `account_name` - (Required) The name of the Batch account. Changing this forces a new resource to be created.
 
-* `allow_updates` - (Optional) A value indicating whether packages within the application may be overwritten using the same version string.
+* `allow_updates` - (Optional) A value indicating whether packages within the application may be overwritten using the same version string. Defaults to `true`.
 
 * `default_version` - (Optional) The package to use if a client requests the application but does not specify a version. This property can only be set to the name of an existing package.
 
