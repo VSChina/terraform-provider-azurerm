@@ -63,14 +63,14 @@ func testCheckAzureRMBatchApplicationExists(resourceName string) resource.TestCh
 		resourceGroup := rs.Primary.Attributes["resource_group_name"]
 		accountName := rs.Primary.Attributes["account_name"]
 
-		client := testAccProvider.Meta().(*ArmClient).applicationClient
+		client := testAccProvider.Meta().(*ArmClient).batchApplicationClient
 		ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
 		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
 				return fmt.Errorf("Bad: Batch Application %q (Account Name %q / Resource Group %q) does not exist", name, accountName, resourceGroup)
 			}
-			return fmt.Errorf("Bad: Get on applicationClient: %+v", err)
+			return fmt.Errorf("Bad: Get on batchApplicationClient: %+v", err)
 		}
 
 		return nil
@@ -78,7 +78,7 @@ func testCheckAzureRMBatchApplicationExists(resourceName string) resource.TestCh
 }
 
 func testCheckAzureRMBatchApplicationDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ArmClient).applicationClient
+	client := testAccProvider.Meta().(*ArmClient).batchApplicationClient
 	ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
 	for _, rs := range s.RootModule().Resources {
@@ -92,7 +92,7 @@ func testCheckAzureRMBatchApplicationDestroy(s *terraform.State) error {
 
 		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Get on applicationClient: %+v", err)
+				return fmt.Errorf("Bad: Get on batchApplicationClient: %+v", err)
 			}
 		}
 
