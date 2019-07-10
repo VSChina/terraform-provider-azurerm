@@ -16,8 +16,10 @@ package azurerm
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
@@ -27,6 +29,7 @@ import (
 func TestAccAzureRMBatchApplication_basic(t *testing.T) {
 	resourceName := "azurerm_batch_application.test"
 	ri := tf.AccRandTimeInt()
+	rs := strings.ToLower(acctest.RandString(11))
 	location := testLocation()
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -35,7 +38,7 @@ func TestAccAzureRMBatchApplication_basic(t *testing.T) {
 		CheckDestroy: testCheckAzureRMBatchApplicationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzureRMBatchApplication_basic(ri, location),
+				Config: testAccAzureRMBatchApplication_basic(ri, rs, location),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckAzureRMBatchApplicationExists(resourceName),
 				),
@@ -99,7 +102,7 @@ func testCheckAzureRMBatchApplicationDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccAzureRMBatchApplication_basic(rInt int, location string) string {
+func testAccAzureRMBatchApplication_basic(rInt int, rString string, location string) string {
 	return fmt.Sprintf(`
 resource "azurerm_resource_group" "test" {
   name     = "acctestRG-%d"
@@ -107,19 +110,19 @@ resource "azurerm_resource_group" "test" {
 }
 
 resource "azurerm_storage_account" "test" {
-  name                   = "acctestsa-%d"
-  resource_group_name    = "${azurerm_resource_group.test.name}"
-  location               = "${azurerm_resource_group.test.location}"
-  accountTier            = "Standard"
-  accountReplicationType = "LRS"
+  name                     = "acctestsa%s"
+  resource_group_name      = "${azurerm_resource_group.test.name}"
+  location                 = "${azurerm_resource_group.test.location}"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
 
 resource "azurerm_batch_account" "test" {
-  name                = "acctestbatch-%d"
-  resource_group_name = "${azurerm_resource_group.test.name}"
-  location            = "${azurerm_resource_group.test.location}"
-  poolAllocationMode  = "BatchService"
-  storageAccountId    = "${azurerm_storage_account.test.id}"
+  name                 = "acctestbatch-%d"
+  resource_group_name  = "${azurerm_resource_group.test.name}"
+  location             = "${azurerm_resource_group.test.location}"
+  pool_allocation_mode = "BatchService"
+  storage_account_id   = "${azurerm_storage_account.test.id}"
 }
 
 resource "azurerm_batch_application" "test" {
@@ -127,5 +130,5 @@ resource "azurerm_batch_application" "test" {
   resource_group_name = "${azurerm_resource_group.test.name}"
   account_name        = "${azurerm_batch_account.test.name}"
 }
-`, rInt, location, rInt, rInt, rInt)
+`, rInt, location, rString, rInt, rInt)
 }

@@ -33,19 +33,19 @@ resource "azurerm_resource_group" "example" {
 }
 
 resource "azurerm_storage_account" "example" {
-  name                   = "examplesa"
-  resource_group_name    = "${azurerm_resource_group.example.name}"
-  location               = "${azurerm_resource_group.example.location}"
-  accountTier            = "Standard"
-  accountReplicationType = "LRS"
+  name                     = "examplesa"
+  resource_group_name      = "${azurerm_resource_group.example.name}"
+  location                 = "${azurerm_resource_group.example.location}"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
 }
 
 resource "azurerm_batch_account" "example" {
-  name                = "example-batch-account"
-  resource_group_name = "${azurerm_resource_group.example.name}"
-  location            = "${azurerm_resource_group.example.location}"
-  poolAllocationMode  = "BatchService"
-  storageAccountId    = "${azurerm_storage_account.example.id}"
+  name                 = "example-batch-account"
+  resource_group_name  = "${azurerm_resource_group.example.name}"
+  location             = "${azurerm_resource_group.example.location}"
+  pool_allocation_mode = "BatchService"
+  storage_account_id   = "${azurerm_storage_account.example.id}"
 }
 
 resource "azurerm_batch_application" "example" {
