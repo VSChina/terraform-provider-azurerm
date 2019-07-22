@@ -118,7 +118,7 @@ resource "azurerm_storage_account" "test" {
 }
 
 resource "azurerm_batch_account" "test" {
-  name                 = "acctestbatch-%d"
+  name                 = "acctestba%s"
   resource_group_name  = "${azurerm_resource_group.test.name}"
   location             = "${azurerm_resource_group.test.location}"
   pool_allocation_mode = "BatchService"
@@ -130,5 +130,5 @@ resource "azurerm_batch_application" "test" {
   resource_group_name = "${azurerm_resource_group.test.name}"
   account_name        = "${azurerm_batch_account.test.name}"
 }
-`, rInt, location, rString, rInt, rInt)
+`, rInt, location, rString, rString, rInt)
 }

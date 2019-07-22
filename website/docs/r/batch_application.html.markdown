@@ -29,7 +29,7 @@ Manage Azure Application instance.
 ```hcl
 resource "azurerm_resource_group" "example" {
   name     = "example-rg"
-  location = "West US"
+  location = "West US 2"
 }
 
 resource "azurerm_storage_account" "example" {
@@ -41,7 +41,7 @@ resource "azurerm_storage_account" "example" {
 }
 
 resource "azurerm_batch_account" "example" {
-  name                 = "example-batch-account"
+  name                 = "exampleba"
   resource_group_name  = "${azurerm_resource_group.example.name}"
   location             = "${azurerm_resource_group.example.location}"
   pool_allocation_mode = "BatchService"
@@ -83,5 +83,5 @@ The following attributes are exported:
 Batch Application can be imported using the `resource id`, e.g.
 
 ```shell
-$ terraform import azurerm_batch_application.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Batch/batchAccounts/example-batch-account/applications/example-batch-application
+$ terraform import azurerm_batch_application.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Batch/batchAccounts/exampleba/applications/example-batch-application
 ```
