@@ -24,6 +24,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/response"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/validate"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
@@ -40,9 +41,10 @@ func resourceArmWebApplicationFirewallPolicy() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validate.NoEmptyStrings,
 			},
 
 			"location": azure.SchemaLocation(),
@@ -150,14 +152,10 @@ func resourceArmWebApplicationFirewallPolicy() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"enabled_state": {
-							Type:     schema.TypeString,
+						"enabled": {
+							Type:     schema.TypeBool,
 							Optional: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								string(network.Disabled),
-								string(network.Enabled),
-							}, false),
-							Default: string(network.Disabled),
+							Default:  true,
 						},
 						"mode": {
 							Type:     schema.TypeString,
@@ -322,11 +320,14 @@ func expandArmWebApplicationFirewallPolicyPolicySettings(input []interface{}) *n
 	}
 	v := input[0].(map[string]interface{})
 
-	enabledState := v["enabled_state"].(string)
+	enabled := network.WebApplicationFirewallEnabledStateDisabled
+	if v["enabled"].(bool) {
+		enabled = network.WebApplicationFirewallEnabledStateEnabled
+	}
 	mode := v["mode"].(string)
 
 	result := network.PolicySettings{
-		EnabledState: network.WebApplicationFirewallEnabledState(enabledState),
+		EnabledState: enabled,
 		Mode:         network.WebApplicationFirewallMode(mode),
 	}
 	return &result
@@ -402,7 +403,7 @@ func flattenArmWebApplicationFirewallPolicyPolicySettings(input *network.PolicyS
 
 	result := make(map[string]interface{})
 
-	result["enabled_state"] = string(input.EnabledState)
+	result["enabled"] = input.EnabledState == network.WebApplicationFirewallEnabledStateDisabled
 	result["mode"] = string(input.Mode)
 
 	return []interface{}{result}

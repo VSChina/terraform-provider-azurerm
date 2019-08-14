@@ -243,14 +243,15 @@ resource "azurerm_web_application_firewall_policy" "test" {
     rule_type = "MatchRule"
 
     match_conditions {
-
       match_variables {
         variable_name = "RemoteAddr"
       }
+
       operator          = "IPMatch"
       negation_conditon = false
       match_values      = ["192.168.1.0/24", "10.0.0.0/24"]
     }
+
     action = "Block"
   }
 
@@ -260,25 +261,26 @@ resource "azurerm_web_application_firewall_policy" "test" {
     rule_type = "MatchRule"
 
     match_conditions {
-
       match_variables {
         variable_name = "RemoteAddr"
       }
+
       operator          = "IPMatch"
       negation_conditon = false
       match_values      = ["192.168.1.0/24"]
     }
 
     match_conditions {
-
       match_variables {
         variable_name = "RequestHeaders"
         selector      = "UserAgent"
       }
+
       operator          = "Contains"
       negation_conditon = false
       match_values      = ["Windows"]
     }
+
     action = "Block"
   }
 }

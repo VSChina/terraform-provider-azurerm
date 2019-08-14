@@ -43,14 +43,15 @@ resource "azurerm_web_application_firewall_policy" "example" {
     rule_type = "MatchRule"
 
     match_conditions {
-
       match_variables {
         variable_name = "RemoteAddr"
       }
+
       operator          = "IPMatch"
       negation_conditon = false
       match_values      = ["192.168.1.0/24", "10.0.0.0/24"]
     }
+
     action = "Block"
   }
 
@@ -60,25 +61,26 @@ resource "azurerm_web_application_firewall_policy" "example" {
     rule_type = "MatchRule"
 
     match_conditions {
-
       match_variables {
         variable_name = "RemoteAddr"
       }
+
       operator          = "IPMatch"
       negation_conditon = false
       match_values      = ["192.168.1.0/24"]
     }
 
     match_conditions {
-
       match_variables {
         variable_name = "RequestHeaders"
         selector      = "UserAgent"
       }
+
       operator          = "Contains"
       negation_conditon = false
       match_values      = ["Windows"]
     }
+
     action = "Block"
   }
 }
@@ -140,7 +142,7 @@ The `match_variable` block supports the following:
 
 The `policy_setting` block supports the following:
 
-* `enabled_state` - (Optional) Describes if the policy is in enabled state or disabled state Defaults to `Disabled`.
+* `enabled` - (Optional) Describes if the policy is in enabled state or disabled state Defaults to `Enabled`.
 
 * `mode` - (Optional) Describes if it is in detection mode  or prevention mode at policy level Defaults to `Prevention`.
 
