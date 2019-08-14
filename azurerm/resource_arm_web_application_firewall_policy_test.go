@@ -218,7 +218,7 @@ resource "azurerm_resource_group" "test" {
 }
 
 resource "azurerm_web_application_firewall_policy" "test" {
-  name                = "acctestpolicy-%d"
+  name                = "acctestwafpolicy-%d"
   resource_group_name = "${azurerm_resource_group.test.name}"
   location            = "${azurerm_resource_group.test.location}"
 }
@@ -233,7 +233,7 @@ resource "azurerm_resource_group" "test" {
 }
 
 resource "azurerm_web_application_firewall_policy" "test" {
-  name                = "acctestpolicy-%d"
+  name                = "acctestwafpolicy-%d"
   resource_group_name = "${azurerm_resource_group.test.name}"
   location            = "${azurerm_resource_group.test.location}"
 

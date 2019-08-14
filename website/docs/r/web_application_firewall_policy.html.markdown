@@ -33,7 +33,7 @@ resource "azurerm_resource_group" "example" {
 }
 
 resource "azurerm_web_application_firewall_policy" "example" {
-  name                = "acctestpolicy-%d"
+  name                = "example-wafpolicy"
   resource_group_name = "${azurerm_resource_group.example.name}"
   location            = "${azurerm_resource_group.example.location}"
 
@@ -158,5 +158,5 @@ The following attributes are exported:
 Web Application Firewall Policy can be imported using the `resource id`, e.g.
 
 ```shell
-$ terraform import azurerm_web_application_firewall_policy.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/
+$ terraform import azurerm_web_application_firewall_policy.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/ApplicationGatewayWebApplicationFirewallPolicies/example-wafpolicy
 ```
