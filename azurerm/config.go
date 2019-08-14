@@ -237,31 +237,32 @@ type ArmClient struct {
 	monitorMetricAlertsClient               insights.MetricAlertsClient
 
 	// Networking
-	applicationGatewayClient        network.ApplicationGatewaysClient
-	applicationSecurityGroupsClient network.ApplicationSecurityGroupsClient
-	azureFirewallsClient            network.AzureFirewallsClient
-	connectionMonitorsClient        network.ConnectionMonitorsClient
-	ddosProtectionPlanClient        network.DdosProtectionPlansClient
-	expressRouteAuthsClient         network.ExpressRouteCircuitAuthorizationsClient
-	expressRouteCircuitClient       network.ExpressRouteCircuitsClient
-	expressRoutePeeringsClient      network.ExpressRouteCircuitPeeringsClient
-	ifaceClient                     network.InterfacesClient
-	loadBalancerClient              network.LoadBalancersClient
-	localNetConnClient              network.LocalNetworkGatewaysClient
-	netProfileClient                network.ProfilesClient
-	packetCapturesClient            network.PacketCapturesClient
-	publicIPClient                  network.PublicIPAddressesClient
-	publicIPPrefixClient            network.PublicIPPrefixesClient
-	routesClient                    network.RoutesClient
-	routeTablesClient               network.RouteTablesClient
-	secGroupClient                  network.SecurityGroupsClient
-	secRuleClient                   network.SecurityRulesClient
-	subnetClient                    network.SubnetsClient
-	vnetGatewayConnectionsClient    network.VirtualNetworkGatewayConnectionsClient
-	vnetGatewayClient               network.VirtualNetworkGatewaysClient
-	vnetClient                      network.VirtualNetworksClient
-	vnetPeeringsClient              network.VirtualNetworkPeeringsClient
-	watcherClient                   network.WatchersClient
+	applicationGatewayClient             network.ApplicationGatewaysClient
+	applicationSecurityGroupsClient      network.ApplicationSecurityGroupsClient
+	azureFirewallsClient                 network.AzureFirewallsClient
+	connectionMonitorsClient             network.ConnectionMonitorsClient
+	ddosProtectionPlanClient             network.DdosProtectionPlansClient
+	expressRouteAuthsClient              network.ExpressRouteCircuitAuthorizationsClient
+	expressRouteCircuitClient            network.ExpressRouteCircuitsClient
+	expressRoutePeeringsClient           network.ExpressRouteCircuitPeeringsClient
+	ifaceClient                          network.InterfacesClient
+	loadBalancerClient                   network.LoadBalancersClient
+	localNetConnClient                   network.LocalNetworkGatewaysClient
+	netProfileClient                     network.ProfilesClient
+	packetCapturesClient                 network.PacketCapturesClient
+	publicIPClient                       network.PublicIPAddressesClient
+	publicIPPrefixClient                 network.PublicIPPrefixesClient
+	routesClient                         network.RoutesClient
+	routeTablesClient                    network.RouteTablesClient
+	secGroupClient                       network.SecurityGroupsClient
+	secRuleClient                        network.SecurityRulesClient
+	subnetClient                         network.SubnetsClient
+	vnetGatewayConnectionsClient         network.VirtualNetworkGatewayConnectionsClient
+	vnetGatewayClient                    network.VirtualNetworkGatewaysClient
+	vnetClient                           network.VirtualNetworksClient
+	vnetPeeringsClient                   network.VirtualNetworkPeeringsClient
+	watcherClient                        network.WatchersClient
+	webApplicationFirewallPoliciesClient network.WebApplicationFirewallPoliciesClient
 
 	// Resources
 	managementLocksClient locks.ManagementLocksClient
@@ -973,6 +974,10 @@ func (c *ArmClient) registerNetworkingClients(endpoint, subscriptionId string, a
 	watchersClient := network.NewWatchersClientWithBaseURI(endpoint, subscriptionId)
 	c.configureClient(&watchersClient.Client, auth)
 	c.watcherClient = watchersClient
+
+	webAppFirewallClient := network.NewWebApplicationFirewallPoliciesClientWithBaseURI(endpoint, subscriptionId)
+	c.configureClient(&webAppFirewallClient.Client, auth)
+	c.webApplicationFirewallPoliciesClient = webAppFirewallClient
 }
 
 func (c *ArmClient) registerNotificationHubsClient(endpoint, subscriptionId string, auth autorest.Authorizer) {
