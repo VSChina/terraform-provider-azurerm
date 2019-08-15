@@ -31,7 +31,7 @@ type Client struct {
 	VnetClient                           network.VirtualNetworksClient
 	VnetPeeringsClient                   network.VirtualNetworkPeeringsClient
 	WatcherClient                        network.WatchersClient
-	webApplicationFirewallPoliciesClient network.WebApplicationFirewallPoliciesClient
+	WebApplicationFirewallPoliciesClient network.WebApplicationFirewallPoliciesClient
 }
 
 func BuildClient(o *common.ClientOptions) *Client {
@@ -112,8 +112,8 @@ func BuildClient(o *common.ClientOptions) *Client {
 	c.WatcherClient = network.NewWatchersClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
 	o.ConfigureClient(&c.WatcherClient.Client, o.ResourceManagerAuthorizer)
 
-	c.webApplicationFirewallPoliciesClient = network.NewWebApplicationFirewallPoliciesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&c.webApplicationFirewallPoliciesClient.Client, o.ResourceManagerAuthorizer)
+	c.WebApplicationFirewallPoliciesClient = network.NewWebApplicationFirewallPoliciesClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
+	o.ConfigureClient(&c.WebApplicationFirewallPoliciesClient.Client, o.ResourceManagerAuthorizer)
 
 	return &c
 }
