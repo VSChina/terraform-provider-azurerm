@@ -172,14 +172,14 @@ func testCheckAzureRMWebApplicationFirewallPolicyExists(resourceName string) res
 		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group_name"]
 
-		client := testAccProvider.Meta().(*ArmClient).webApplicationFirewallPoliciesClient
+		client := testAccProvider.Meta().(*ArmClient).network.WebApplicationFirewallPoliciesClient
 		ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
 		if resp, err := client.Get(ctx, resourceGroup, name); err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
 				return fmt.Errorf("Bad: Web Application Firewall Policy %q (Resource Group %q) does not exist", name, resourceGroup)
 			}
-			return fmt.Errorf("Bad: Get on webApplicationFirewallPoliciesClient: %+v", err)
+			return fmt.Errorf("Bad: Get on network.WebApplicationFirewallPoliciesClient: %+v", err)
 		}
 
 		return nil
@@ -187,7 +187,7 @@ func testCheckAzureRMWebApplicationFirewallPolicyExists(resourceName string) res
 }
 
 func testCheckAzureRMWebApplicationFirewallPolicyDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ArmClient).webApplicationFirewallPoliciesClient
+	client := testAccProvider.Meta().(*ArmClient).network.WebApplicationFirewallPoliciesClient
 	ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
 	for _, rs := range s.RootModule().Resources {
@@ -200,7 +200,7 @@ func testCheckAzureRMWebApplicationFirewallPolicyDestroy(s *terraform.State) err
 
 		if resp, err := client.Get(ctx, resourceGroup, name); err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Get on webApplicationFirewallPoliciesClient: %+v", err)
+				return fmt.Errorf("Bad: Get on network.WebApplicationFirewallPoliciesClient: %+v", err)
 			}
 		}
 
