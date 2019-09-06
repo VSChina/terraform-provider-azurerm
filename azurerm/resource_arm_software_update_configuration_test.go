@@ -16,11 +16,129 @@ package azurerm
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
+
+func TestAccAzureRMSoftwareUpdateConfiguration_basic(t *testing.T) {
+	resourceName := "azurerm_software_update_configuration.test"
+	ri := tf.AccRandTimeInt()
+	location := testLocation()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testCheckAzureRMSoftwareUpdateConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAzureRMSoftwareUpdateConfiguration_basic(ri, location),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.start_time", "2019-10-24T03:56:08.45Z"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.time_zone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.operating_system", "Linux"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.0", "${azurerm_virtual_machine.<%= resource_id_hint -%>.id}"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.included_package_classifications", "Critical"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.reboot_setting", "IfRequired"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAzureRMSoftwareUpdateConfiguration_complete(t *testing.T) {
+	resourceName := "azurerm_software_update_configuration.test"
+	ri := tf.AccRandTimeInt()
+	location := testLocation()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testCheckAzureRMSoftwareUpdateConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAzureRMSoftwareUpdateConfiguration_complete(ri, location),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.start_time", "2019-10-24T03:56:08.45Z"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.time_zone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.operating_system", "Linux"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.0", "${azurerm_virtual_machine.<%= resource_id_hint -%>.id}"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.included_package_classifications", "Critical"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.reboot_setting", "IfRequired"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAzureRMSoftwareUpdateConfiguration_update(t *testing.T) {
+	resourceName := "azurerm_software_update_configuration.test"
+	ri := tf.AccRandTimeInt()
+	location := testLocation()
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testCheckAzureRMSoftwareUpdateConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAzureRMSoftwareUpdateConfiguration_basic(ri, location),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.start_time", "2019-10-24T03:56:08.45Z"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.time_zone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.operating_system", "Linux"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.0", "${azurerm_virtual_machine.<%= resource_id_hint -%>.id}"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.included_package_classifications", "Critical"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.reboot_setting", "IfRequired"),
+				),
+			},
+			{
+				Config: testAccAzureRMSoftwareUpdateConfiguration_complete(ri, location),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.start_time", "2019-10-24T03:56:08.45Z"),
+					resource.TestCheckResourceAttr(resourceName, "schedule_info.0.time_zone", "America/Los_Angeles"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.operating_system", "Linux"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.azure_virtual_machines.0", "${azurerm_virtual_machine.<%= resource_id_hint -%>.id}"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.included_package_classifications", "Critical"),
+					resource.TestCheckResourceAttr(resourceName, "update_configuration.0.linux.0.reboot_setting", "IfRequired"),
+				),
+			},
+		},
+	})
+}
 
 func testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -30,7 +148,7 @@ func testCheckAzureRMSoftwareUpdateConfigurationExists(resourceName string) reso
 		}
 
 		name := rs.Primary.Attributes["name"]
-		resourceGroup := rs.Primary.Attributes["resource_group"]
+		resourceGroup := rs.Primary.Attributes["resource_group_name"]
 		automationAccountName := rs.Primary.Attributes["automation_account_name"]
 		clientRequestID := rs.Primary.Attributes["client_request_id"]
 
@@ -58,7 +176,7 @@ func testCheckAzureRMSoftwareUpdateConfigurationDestroy(s *terraform.State) erro
 		}
 
 		name := rs.Primary.Attributes["name"]
-		resourceGroup := rs.Primary.Attributes["resource_group"]
+		resourceGroup := rs.Primary.Attributes["resource_group_name"]
 		automationAccountName := rs.Primary.Attributes["automation_account_name"]
 		clientRequestID := rs.Primary.Attributes["client_request_id"]
 
@@ -72,4 +190,176 @@ func testCheckAzureRMSoftwareUpdateConfigurationDestroy(s *terraform.State) erro
 	}
 
 	return nil
+}
+
+func testAccAzureRMSoftwareUpdateConfiguration_basic(rInt int, location string) string {
+	return fmt.Sprintf(`
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_automation_account" "test" {
+  name                = "acctestAutoAccount-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  location            = "${azurerm_resource_group.test.location}"
+  sku_name            = "Basic"
+}
+
+resource "azurerm_log_analytics_workspace" "test" {
+  name                = "acctestLogAnalyticsWS-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  location            = "${azurerm_resource_group.test.location}"
+  sku                 = "PerGB2018"
+}
+
+resource "azurerm_log_analytics_linked_service" "test" {
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  workspace_name      = "${azurerm_log_analytics_workspace.test.name}"
+  resource_id         = "${azurerm_automation_account.test.id}"
+}
+
+resource "azurerm_virtual_machine" "test" {
+  name                  = "acctestVM-%d"
+  resource_group_name   = "${azurerm_resource_group.test.name}"
+  location              = "${azurerm_resource_group.test.location}"
+  network_interface_ids = ["${azurerm_network_interface.test.id}"]
+  vm_size               = "Standard_DS1_v2"
+
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "16.04-LTS"
+    version   = "latest"
+  }
+
+  storage_os_disk {
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+
+  os_profile {
+    computer_name  = "hostname"
+    admin_username = "testadmin"
+    admin_password = "Password1234!"
+  }
+
+  os_profile_linux_config {
+    disable_password_authentication = false
+  }
+
+  tags = {
+    environment = "staging"
+  }
+}
+
+resource "azurerm_software_update_configuration" "test" {
+  name                    = "acctestSUConfig-%d"
+  resource_group_name     = "${azurerm_resource_group.test.name}"
+  automation_account_name = "${azurerm_automation_account.test.name}"
+
+  schedule_info {
+    start_time = "2019-10-24T03:56:08.45Z"
+    time_zone  = "America/Los_Angeles"
+  }
+
+  update_configuration {
+    operating_system       = "Linux"
+    azure_virtual_machines = ["${azurerm_virtual_machine.test.id}"]
+
+    linux {
+      included_package_classifications = "Critical"
+      reboot_setting                   = "IfRequired"
+    }
+  }
+}
+`, rInt, location, rInt, rInt, rInt, rInt)
+}
+
+func testAccAzureRMSoftwareUpdateConfiguration_complete(rInt int, location string) string {
+	return fmt.Sprintf(`
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_automation_account" "test" {
+  name                = "acctestAutoAccount-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  location            = "${azurerm_resource_group.test.location}"
+  sku_name            = "Basic"
+}
+
+resource "azurerm_log_analytics_workspace" "test" {
+  name                = "acctestLogAnalyticsWS-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  location            = "${azurerm_resource_group.test.location}"
+  sku                 = "PerGB2018"
+}
+
+resource "azurerm_log_analytics_linked_service" "test" {
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  workspace_name      = "${azurerm_log_analytics_workspace.test.name}"
+  resource_id         = "${azurerm_automation_account.test.id}"
+}
+
+resource "azurerm_virtual_machine" "test" {
+  name                  = "acctestVM-%d"
+  resource_group_name   = "${azurerm_resource_group.test.name}"
+  location              = "${azurerm_resource_group.test.location}"
+  network_interface_ids = ["${azurerm_network_interface.test.id}"]
+  vm_size               = "Standard_DS1_v2"
+
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "16.04-LTS"
+    version   = "latest"
+  }
+
+  storage_os_disk {
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+
+  os_profile {
+    computer_name  = "hostname"
+    admin_username = "testadmin"
+    admin_password = "Password1234!"
+  }
+
+  os_profile_linux_config {
+    disable_password_authentication = false
+  }
+
+  tags = {
+    environment = "staging"
+  }
+}
+
+resource "azurerm_software_update_configuration" "test" {
+  name                    = "acctestSUConfig-%d"
+  resource_group_name     = "${azurerm_resource_group.test.name}"
+  automation_account_name = "${azurerm_automation_account.test.name}"
+
+  schedule_info {
+    start_time = "2019-10-24T03:56:08.45Z"
+    time_zone  = "America/Los_Angeles"
+  }
+
+  update_configuration {
+    operating_system       = "Linux"
+    azure_virtual_machines = ["${azurerm_virtual_machine.test.id}"]
+
+    linux {
+      included_package_classifications = "Critical"
+      reboot_setting                   = "IfRequired"
+    }
+  }
+}
+`, rInt, location, rInt, rInt, rInt, rInt)
 }
