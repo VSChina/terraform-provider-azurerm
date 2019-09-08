@@ -46,7 +46,12 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 				ValidateFunc: validate.NoEmptyStrings,
 			},
 
-			"resource_group_name": azure.SchemaResourceGroupNameDiffSuppress(),
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"resource_group": azure.SchemaResourceGroupNameDiffSuppress(),
 
 			"automation_account_name": {
 				Type:         schema.TypeString,
@@ -67,9 +72,14 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"month_days": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
 									"monthly_occurrences": {
 										Type:     schema.TypeList,
 										Optional: true,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"day": {
@@ -94,11 +104,8 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 										},
 									},
 									"week_days": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeString,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
 									},
 								},
 							},
@@ -118,7 +125,7 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							ValidateFunc: validateRFC3339Date,
 						},
 						"expiry_time_offset_minutes": {
-							Type:     schema.TypeFloat,
+							Type:     schema.TypeInt,
 							Optional: true,
 						},
 						"frequency": {
@@ -153,7 +160,7 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							ValidateFunc: validateRFC3339Date,
 						},
 						"next_run_offset_minutes": {
-							Type:     schema.TypeFloat,
+							Type:     schema.TypeInt,
 							Optional: true,
 						},
 						"start_time": {
@@ -182,13 +189,11 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 								string(automation.Windows),
 								string(automation.Linux),
 							}, false),
+							Default: string(automation.Windows),
 						},
 						"azure_virtual_machines": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"duration": {
 							Type:         schema.TypeString,
@@ -202,11 +207,8 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"excluded_package_name_masks": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeString,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
 									},
 									"included_package_classifications": {
 										Type:     schema.TypeString,
@@ -220,11 +222,8 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 										Default: string(automation.Unclassified),
 									},
 									"included_package_name_masks": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeString,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
 									},
 									"reboot_setting": {
 										Type:     schema.TypeString,
@@ -234,11 +233,8 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							},
 						},
 						"non_azure_computer_names": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeString,
 							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 						"targets": {
 							Type:     schema.TypeList,
@@ -249,21 +245,16 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 									"azure_queries": {
 										Type:     schema.TypeList,
 										Optional: true,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"locations": {
-													Type:     schema.TypeList,
+													Type:     schema.TypeString,
 													Optional: true,
-													Elem: &schema.Schema{
-														Type: schema.TypeString,
-													},
 												},
 												"scope": {
-													Type:     schema.TypeList,
+													Type:     schema.TypeString,
 													Optional: true,
-													Elem: &schema.Schema{
-														Type: schema.TypeString,
-													},
 												},
 											},
 										},
@@ -271,6 +262,7 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 									"non_azure_queries": {
 										Type:     schema.TypeList,
 										Optional: true,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"function_alias": {
@@ -294,34 +286,28 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"excluded_kb_numbers": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeString,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
 									},
 									"included_kb_numbers": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeString,
 										Optional: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
 									},
 									"included_update_classifications": {
 										Type:     schema.TypeString,
 										Optional: true,
 										ValidateFunc: validation.StringInSlice([]string{
-											string(automation.WindowsUpdateClassesUnclassified),
-											string(automation.WindowsUpdateClassesCritical),
-											string(automation.WindowsUpdateClassesSecurity),
-											string(automation.WindowsUpdateClassesUpdateRollup),
-											string(automation.WindowsUpdateClassesFeaturePack),
-											string(automation.WindowsUpdateClassesServicePack),
-											string(automation.WindowsUpdateClassesDefinition),
-											string(automation.WindowsUpdateClassesTools),
-											string(automation.WindowsUpdateClassesUpdates),
+											string(automation.Unclassified),
+											string(automation.Critical),
+											string(automation.Security),
+											string(automation.UpdateRollup),
+											string(automation.FeaturePack),
+											string(automation.ServicePack),
+											string(automation.Definition),
+											string(automation.Tools),
+											string(automation.Updates),
 										}, false),
-										Default: string(automation.WindowsUpdateClassesUnclassified),
+										Default: string(automation.Unclassified),
 									},
 									"reboot_setting": {
 										Type:     schema.TypeString,
@@ -423,6 +409,16 @@ func resourceArmSoftwareUpdateConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+
+			"provisioning_state": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -432,7 +428,7 @@ func resourceArmSoftwareUpdateConfigurationCreateUpdate(d *schema.ResourceData, 
 	ctx := meta.(*ArmClient).StopContext
 
 	name := d.Get("name").(string)
-	resourceGroup := d.Get("resource_group_name").(string)
+	resourceGroup := d.Get("resource_group").(string)
 	automationAccountName := d.Get("automation_account_name").(string)
 	clientRequestID := d.Get("client_request_id").(string)
 
@@ -453,16 +449,16 @@ func resourceArmSoftwareUpdateConfigurationCreateUpdate(d *schema.ResourceData, 
 	tasks := d.Get("tasks").([]interface{})
 	updateConfiguration := d.Get("update_configuration").([]interface{})
 
-	parameters := automation.SoftwareUpdateConfiguration{
-		SoftwareUpdateConfigurationProperties: &automation.SoftwareUpdateConfigurationProperties{
+	parameters := automation.softwareUpdateConfiguration{
+		Properties: &automation.softwareUpdateConfigurationProperties{
 			Error:               expandArmSoftwareUpdateConfigurationErrorResponse(error),
 			ScheduleInfo:        expandArmSoftwareUpdateConfigurationScheduleProperties(scheduleInfo),
-			Tasks:               expandArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(tasks),
-			UpdateConfiguration: expandArmSoftwareUpdateConfigurationUpdateConfiguration(updateConfiguration),
+			Tasks:               expandArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(tasks),
+			UpdateConfiguration: expandArmSoftwareUpdateConfigurationupdateConfiguration(updateConfiguration),
 		},
 	}
 
-	if _, err := client.Create(ctx, resourceGroup, automationAccountName, name, parameters, clientRequestID); err != nil {
+	if _, err := client.Create(ctx, resourceGroup, automationAccountName, name, clientRequestID, parameters); err != nil {
 		return fmt.Errorf("Error creating Software Update Configuration %q (Client Request %q / Automation Account Name %q / Resource Group %q): %+v", name, clientRequestID, automationAccountName, resourceGroup, err)
 	}
 
@@ -489,7 +485,6 @@ func resourceArmSoftwareUpdateConfigurationRead(d *schema.ResourceData, meta int
 	resourceGroup := id.ResourceGroup
 	automationAccountName := id.Path["automationAccounts"]
 	name := id.Path["softwareUpdateConfigurations"]
-	clientRequestID := id.Path["clientRequestID"]
 
 	resp, err := client.GetByName(ctx, resourceGroup, automationAccountName, name, clientRequestID)
 	if err != nil {
@@ -502,27 +497,32 @@ func resourceArmSoftwareUpdateConfigurationRead(d *schema.ResourceData, meta int
 	}
 
 	d.Set("name", resp.Name)
-	d.Set("resource_group_name", resourceGroup)
+	d.Set("name", resp.Name)
+	d.Set("name", resp.Name)
+	d.Set("name", resp.Name)
+	d.Set("resource_group", resourceGroup)
 	d.Set("automation_account_name", automationAccountName)
 	d.Set("client_request_id", clientRequestID)
-	if softwareUpdateConfigurationProperties := resp.SoftwareUpdateConfigurationProperties; softwareUpdateConfigurationProperties != nil {
-		d.Set("created_by", softwareUpdateConfigurationProperties.CreatedBy)
-		d.Set("creation_time", (softwareUpdateConfigurationProperties.CreationTime).String())
-		if err := d.Set("error", flattenArmSoftwareUpdateConfigurationErrorResponse(softwareUpdateConfigurationProperties.Error)); err != nil {
+	if properties := resp.Properties; properties != nil {
+		d.Set("created_by", properties.CreatedBy)
+		d.Set("creation_time", (properties.CreationTime).String())
+		if err := d.Set("error", flattenArmSoftwareUpdateConfigurationErrorResponse(properties.Error)); err != nil {
 			return fmt.Errorf("Error setting `error`: %+v", err)
 		}
-		d.Set("last_modified_by", softwareUpdateConfigurationProperties.LastModifiedBy)
-		d.Set("last_modified_time", (softwareUpdateConfigurationProperties.LastModifiedTime).String())
-		if err := d.Set("schedule_info", flattenArmSoftwareUpdateConfigurationScheduleProperties(softwareUpdateConfigurationProperties.ScheduleInfo)); err != nil {
+		d.Set("last_modified_by", properties.LastModifiedBy)
+		d.Set("last_modified_time", (properties.LastModifiedTime).String())
+		d.Set("provisioning_state", properties.ProvisioningState)
+		if err := d.Set("schedule_info", flattenArmSoftwareUpdateConfigurationScheduleProperties(properties.ScheduleInfo)); err != nil {
 			return fmt.Errorf("Error setting `schedule_info`: %+v", err)
 		}
-		if err := d.Set("tasks", flattenArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(softwareUpdateConfigurationProperties.Tasks)); err != nil {
+		if err := d.Set("tasks", flattenArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(properties.Tasks)); err != nil {
 			return fmt.Errorf("Error setting `tasks`: %+v", err)
 		}
-		if err := d.Set("update_configuration", flattenArmSoftwareUpdateConfigurationUpdateConfiguration(softwareUpdateConfigurationProperties.UpdateConfiguration)); err != nil {
+		if err := d.Set("update_configuration", flattenArmSoftwareUpdateConfigurationupdateConfiguration(properties.UpdateConfiguration)); err != nil {
 			return fmt.Errorf("Error setting `update_configuration`: %+v", err)
 		}
 	}
+	d.Set("type", resp.Type)
 
 	return nil
 }
@@ -538,7 +538,6 @@ func resourceArmSoftwareUpdateConfigurationDelete(d *schema.ResourceData, meta i
 	resourceGroup := id.ResourceGroup
 	automationAccountName := id.Path["automationAccounts"]
 	name := id.Path["softwareUpdateConfigurations"]
-	clientRequestID := id.Path["clientRequestID"]
 
 	if _, err := client.Delete(ctx, resourceGroup, automationAccountName, name, clientRequestID); err != nil {
 		return fmt.Errorf("Error deleting Software Update Configuration %q (Client Request %q / Automation Account Name %q / Resource Group %q): %+v", name, clientRequestID, automationAccountName, resourceGroup, err)
@@ -571,10 +570,10 @@ func expandArmSoftwareUpdateConfigurationScheduleProperties(input []interface{})
 
 	startTime := v["start_time"].(string)
 	expiryTime := v["expiry_time"].(string)
-	expiryTimeOffsetMinutes := v["expiry_time_offset_minutes"].(float64)
+	expiryTimeOffsetMinutes := v["expiry_time_offset_minutes"].(int)
 	isEnabled := v["is_enabled"].(bool)
 	nextRun := v["next_run"].(string)
-	nextRunOffsetMinutes := v["next_run_offset_minutes"].(float64)
+	nextRunOffsetMinutes := v["next_run_offset_minutes"].(int)
 	interval := v["interval"].(int)
 	frequency := v["frequency"].(string)
 	timeZone := v["time_zone"].(string)
@@ -588,20 +587,20 @@ func expandArmSoftwareUpdateConfigurationScheduleProperties(input []interface{})
 		CreationTime:            convertStringToDate(creationTime),
 		Description:             utils.String(description),
 		ExpiryTime:              convertStringToDate(expiryTime),
-		ExpiryTimeOffsetMinutes: utils.Float(expiryTimeOffsetMinutes),
+		ExpiryTimeOffsetMinutes: utils.Int(expiryTimeOffsetMinutes),
 		Frequency:               automation.ScheduleFrequency(frequency),
-		Interval:                utils.Int32(int32(interval)),
+		Interval:                utils.Int(interval),
 		IsEnabled:               utils.Bool(isEnabled),
 		LastModifiedTime:        convertStringToDate(lastModifiedTime),
 		NextRun:                 convertStringToDate(nextRun),
-		NextRunOffsetMinutes:    utils.Float(nextRunOffsetMinutes),
+		NextRunOffsetMinutes:    utils.Int(nextRunOffsetMinutes),
 		StartTime:               convertStringToDate(startTime),
 		TimeZone:                utils.String(timeZone),
 	}
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(input []interface{}) *automation.SoftwareUpdateConfigurationTasks {
+func expandArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(input []interface{}) *automation.softwareUpdateConfigurationTasks {
 	if len(input) == 0 {
 		return nil
 	}
@@ -610,14 +609,14 @@ func expandArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(input 
 	preTask := v["pre_task"].([]interface{})
 	postTask := v["post_task"].([]interface{})
 
-	result := automation.SoftwareUpdateConfigurationTasks{
-		PostTask: expandArmSoftwareUpdateConfigurationTaskProperties(postTask),
-		PreTask:  expandArmSoftwareUpdateConfigurationTaskProperties(preTask),
+	result := automation.softwareUpdateConfigurationTasks{
+		PostTask: expandArmSoftwareUpdateConfigurationtaskProperties(postTask),
+		PreTask:  expandArmSoftwareUpdateConfigurationtaskProperties(preTask),
 	}
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationUpdateConfiguration(input []interface{}) *automation.UpdateConfiguration {
+func expandArmSoftwareUpdateConfigurationupdateConfiguration(input []interface{}) *automation.updateConfiguration {
 	if len(input) == 0 {
 		return nil
 	}
@@ -627,15 +626,15 @@ func expandArmSoftwareUpdateConfigurationUpdateConfiguration(input []interface{}
 	windows := v["windows"].([]interface{})
 	linux := v["linux"].([]interface{})
 	duration := v["duration"].(string)
-	azureVirtualMachines := v["azure_virtual_machines"].([]interface{})
-	nonAzureComputerNames := v["non_azure_computer_names"].([]interface{})
+	azureVirtualMachines := v["azure_virtual_machines"].(string)
+	nonAzureComputerNames := v["non_azure_computer_names"].(string)
 	targets := v["targets"].([]interface{})
 
-	result := automation.UpdateConfiguration{
-		AzureVirtualMachines:  utils.ExpandStringSlice(azureVirtualMachines),
+	result := automation.updateConfiguration{
+		AzureVirtualMachines:  utils.String(azureVirtualMachines),
 		Duration:              utils.String(duration),
 		Linux:                 expandArmSoftwareUpdateConfigurationLinuxProperties(linux),
-		NonAzureComputerNames: utils.ExpandStringSlice(nonAzureComputerNames),
+		NonAzureComputerNames: utils.String(nonAzureComputerNames),
 		OperatingSystem:       automation.OperatingSystemType(operatingSystem),
 		Targets:               expandArmSoftwareUpdateConfigurationTargetProperties(targets),
 		Windows:               expandArmSoftwareUpdateConfigurationWindowsProperties(windows),
@@ -649,12 +648,14 @@ func expandArmSoftwareUpdateConfigurationAdvancedSchedule(input []interface{}) *
 	}
 	v := input[0].(map[string]interface{})
 
-	weekDays := v["week_days"].([]interface{})
+	weekDays := v["week_days"].(string)
+	monthDays := v["month_days"].(int)
 	monthlyOccurrences := v["monthly_occurrences"].([]interface{})
 
 	result := automation.AdvancedSchedule{
+		MonthDays:          utils.Int(monthDays),
 		MonthlyOccurrences: expandArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(monthlyOccurrences),
-		WeekDays:           utils.ExpandStringSlice(weekDays),
+		WeekDays:           utils.String(weekDays),
 	}
 	return &result
 }
@@ -674,7 +675,7 @@ func convertStringToDate(input interface{}) *date.Time {
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationTaskProperties(input []interface{}) *automation.TaskProperties {
+func expandArmSoftwareUpdateConfigurationtaskProperties(input []interface{}) *automation.taskProperties {
 	if len(input) == 0 {
 		return nil
 	}
@@ -683,7 +684,7 @@ func expandArmSoftwareUpdateConfigurationTaskProperties(input []interface{}) *au
 	parameters := v["parameters"].(map[string]interface{})
 	source := v["source"].(string)
 
-	result := automation.TaskProperties{
+	result := automation.taskProperties{
 		Parameters: utils.ExpandKeyValuePairs(parameters),
 		Source:     utils.String(source),
 	}
@@ -697,14 +698,14 @@ func expandArmSoftwareUpdateConfigurationLinuxProperties(input []interface{}) *a
 	v := input[0].(map[string]interface{})
 
 	includedPackageClassifications := v["included_package_classifications"].(string)
-	excludedPackageNameMasks := v["excluded_package_name_masks"].([]interface{})
-	includedPackageNameMasks := v["included_package_name_masks"].([]interface{})
+	excludedPackageNameMasks := v["excluded_package_name_masks"].(string)
+	includedPackageNameMasks := v["included_package_name_masks"].(string)
 	rebootSetting := v["reboot_setting"].(string)
 
 	result := automation.LinuxProperties{
-		ExcludedPackageNameMasks:       utils.ExpandStringSlice(excludedPackageNameMasks),
+		ExcludedPackageNameMasks:       utils.String(excludedPackageNameMasks),
 		IncludedPackageClassifications: automation.LinuxUpdateClasses(includedPackageClassifications),
-		IncludedPackageNameMasks:       utils.ExpandStringSlice(includedPackageNameMasks),
+		IncludedPackageNameMasks:       utils.String(includedPackageNameMasks),
 		RebootSetting:                  utils.String(rebootSetting),
 	}
 	return &result
@@ -733,68 +734,65 @@ func expandArmSoftwareUpdateConfigurationWindowsProperties(input []interface{}) 
 	v := input[0].(map[string]interface{})
 
 	includedUpdateClassifications := v["included_update_classifications"].(string)
-	excludedKbNumbers := v["excluded_kb_numbers"].([]interface{})
-	includedKbNumbers := v["included_kb_numbers"].([]interface{})
+	excludedKbNumbers := v["excluded_kb_numbers"].(string)
+	includedKbNumbers := v["included_kb_numbers"].(string)
 	rebootSetting := v["reboot_setting"].(string)
 
 	result := automation.WindowsProperties{
-		ExcludedKbNumbers:             utils.ExpandStringSlice(excludedKbNumbers),
-		IncludedKbNumbers:             utils.ExpandStringSlice(includedKbNumbers),
+		ExcludedKbNumbers:             utils.String(excludedKbNumbers),
+		IncludedKbNumbers:             utils.String(includedKbNumbers),
 		IncludedUpdateClassifications: automation.WindowsUpdateClasses(includedUpdateClassifications),
 		RebootSetting:                 utils.String(rebootSetting),
 	}
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(input []interface{}) *[]automation.AdvancedScheduleMonthlyOccurrence {
-	results := make([]automation.AdvancedScheduleMonthlyOccurrence, 0)
-	for _, item := range input {
-		v := item.(map[string]interface{})
-		occurrence := v["occurrence"].(int)
-		day := v["day"].(string)
-
-		result := automation.AdvancedScheduleMonthlyOccurrence{
-			Day:        automation.ScheduleDay(day),
-			Occurrence: utils.Int32(int32(occurrence)),
-		}
-
-		results = append(results, result)
+func expandArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(input []interface{}) *automation.AdvancedScheduleMonthlyOccurrence {
+	if len(input) == 0 {
+		return nil
 	}
-	return &results
+	v := input[0].(map[string]interface{})
+
+	occurrence := v["occurrence"].(int)
+	day := v["day"].(string)
+
+	result := automation.AdvancedScheduleMonthlyOccurrence{
+		Day:        automation.ScheduleDay(day),
+		Occurrence: utils.Int(occurrence),
+	}
+	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationAzureQueryProperties(input []interface{}) *[]automation.AzureQueryProperties {
-	results := make([]automation.AzureQueryProperties, 0)
-	for _, item := range input {
-		v := item.(map[string]interface{})
-		scope := v["scope"].([]interface{})
-		locations := v["locations"].([]interface{})
-
-		result := automation.AzureQueryProperties{
-			Locations: utils.ExpandStringSlice(locations),
-			Scope:     utils.ExpandStringSlice(scope),
-		}
-
-		results = append(results, result)
+func expandArmSoftwareUpdateConfigurationAzureQueryProperties(input []interface{}) *automation.AzureQueryProperties {
+	if len(input) == 0 {
+		return nil
 	}
-	return &results
+	v := input[0].(map[string]interface{})
+
+	scope := v["scope"].(string)
+	locations := v["locations"].(string)
+
+	result := automation.AzureQueryProperties{
+		Locations: utils.String(locations),
+		Scope:     utils.String(scope),
+	}
+	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationNonAzureQueryProperties(input []interface{}) *[]automation.NonAzureQueryProperties {
-	results := make([]automation.NonAzureQueryProperties, 0)
-	for _, item := range input {
-		v := item.(map[string]interface{})
-		functionAlias := v["function_alias"].(string)
-		workspaceId := v["workspace_id"].(string)
-
-		result := automation.NonAzureQueryProperties{
-			FunctionAlias: utils.String(functionAlias),
-			WorkspaceID:   utils.String(workspaceId),
-		}
-
-		results = append(results, result)
+func expandArmSoftwareUpdateConfigurationNonAzureQueryProperties(input []interface{}) *automation.NonAzureQueryProperties {
+	if len(input) == 0 {
+		return nil
 	}
-	return &results
+	v := input[0].(map[string]interface{})
+
+	functionAlias := v["function_alias"].(string)
+	workspaceId := v["workspace_id"].(string)
+
+	result := automation.NonAzureQueryProperties{
+		FunctionAlias: utils.String(functionAlias),
+		WorkspaceID:   utils.String(workspaceId),
+	}
+	return &result
 }
 
 func flattenArmSoftwareUpdateConfigurationErrorResponse(input *automation.ErrorResponse) []interface{} {
@@ -836,7 +834,7 @@ func flattenArmSoftwareUpdateConfigurationScheduleProperties(input *automation.S
 	}
 	result["frequency"] = string(input.Frequency)
 	if interval := input.Interval; interval != nil {
-		result["interval"] = int(*interval)
+		result["interval"] = *interval
 	}
 	if isEnabled := input.IsEnabled; isEnabled != nil {
 		result["is_enabled"] = *isEnabled
@@ -860,32 +858,36 @@ func flattenArmSoftwareUpdateConfigurationScheduleProperties(input *automation.S
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(input *automation.SoftwareUpdateConfigurationTasks) []interface{} {
+func flattenArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(input *automation.softwareUpdateConfigurationTasks) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
 
 	result := make(map[string]interface{})
 
-	result["post_task"] = flattenArmSoftwareUpdateConfigurationTaskProperties(input.PostTask)
-	result["pre_task"] = flattenArmSoftwareUpdateConfigurationTaskProperties(input.PreTask)
+	result["post_task"] = flattenArmSoftwareUpdateConfigurationtaskProperties(input.PostTask)
+	result["pre_task"] = flattenArmSoftwareUpdateConfigurationtaskProperties(input.PreTask)
 
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationUpdateConfiguration(input *automation.UpdateConfiguration) []interface{} {
+func flattenArmSoftwareUpdateConfigurationupdateConfiguration(input *automation.updateConfiguration) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
 
 	result := make(map[string]interface{})
 
-	result["azure_virtual_machines"] = utils.FlattenStringSlice(input.AzureVirtualMachines)
+	if azureVirtualMachines := input.AzureVirtualMachines; azureVirtualMachines != nil {
+		result["azure_virtual_machines"] = *azureVirtualMachines
+	}
 	if duration := input.Duration; duration != nil {
 		result["duration"] = *duration
 	}
 	result["linux"] = flattenArmSoftwareUpdateConfigurationLinuxProperties(input.Linux)
-	result["non_azure_computer_names"] = utils.FlattenStringSlice(input.NonAzureComputerNames)
+	if nonAzureComputerNames := input.NonAzureComputerNames; nonAzureComputerNames != nil {
+		result["non_azure_computer_names"] = *nonAzureComputerNames
+	}
 	result["operating_system"] = string(input.OperatingSystem)
 	result["targets"] = flattenArmSoftwareUpdateConfigurationTargetProperties(input.Targets)
 	result["windows"] = flattenArmSoftwareUpdateConfigurationWindowsProperties(input.Windows)
@@ -900,13 +902,18 @@ func flattenArmSoftwareUpdateConfigurationAdvancedSchedule(input *automation.Adv
 
 	result := make(map[string]interface{})
 
+	if monthDays := input.MonthDays; monthDays != nil {
+		result["month_days"] = *monthDays
+	}
 	result["monthly_occurrences"] = flattenArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(input.MonthlyOccurrences)
-	result["week_days"] = utils.FlattenStringSlice(input.WeekDays)
+	if weekDays := input.WeekDays; weekDays != nil {
+		result["week_days"] = *weekDays
+	}
 
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationTaskProperties(input *automation.TaskProperties) []interface{} {
+func flattenArmSoftwareUpdateConfigurationtaskProperties(input *automation.taskProperties) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
@@ -928,9 +935,13 @@ func flattenArmSoftwareUpdateConfigurationLinuxProperties(input *automation.Linu
 
 	result := make(map[string]interface{})
 
-	result["excluded_package_name_masks"] = utils.FlattenStringSlice(input.ExcludedPackageNameMasks)
+	if excludedPackageNameMasks := input.ExcludedPackageNameMasks; excludedPackageNameMasks != nil {
+		result["excluded_package_name_masks"] = *excludedPackageNameMasks
+	}
 	result["included_package_classifications"] = string(input.IncludedPackageClassifications)
-	result["included_package_name_masks"] = utils.FlattenStringSlice(input.IncludedPackageNameMasks)
+	if includedPackageNameMasks := input.IncludedPackageNameMasks; includedPackageNameMasks != nil {
+		result["included_package_name_masks"] = *includedPackageNameMasks
+	}
 	if rebootSetting := input.RebootSetting; rebootSetting != nil {
 		result["reboot_setting"] = *rebootSetting
 	}
@@ -958,8 +969,12 @@ func flattenArmSoftwareUpdateConfigurationWindowsProperties(input *automation.Wi
 
 	result := make(map[string]interface{})
 
-	result["excluded_kb_numbers"] = utils.FlattenStringSlice(input.ExcludedKbNumbers)
-	result["included_kb_numbers"] = utils.FlattenStringSlice(input.IncludedKbNumbers)
+	if excludedKbNumbers := input.ExcludedKbNumbers; excludedKbNumbers != nil {
+		result["excluded_kb_numbers"] = *excludedKbNumbers
+	}
+	if includedKbNumbers := input.IncludedKbNumbers; includedKbNumbers != nil {
+		result["included_kb_numbers"] = *includedKbNumbers
+	}
 	result["included_update_classifications"] = string(input.IncludedUpdateClassifications)
 	if rebootSetting := input.RebootSetting; rebootSetting != nil {
 		result["reboot_setting"] = *rebootSetting
@@ -968,62 +983,51 @@ func flattenArmSoftwareUpdateConfigurationWindowsProperties(input *automation.Wi
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(input *[]automation.AdvancedScheduleMonthlyOccurrence) []interface{} {
-	results := make([]interface{}, 0)
+func flattenArmSoftwareUpdateConfigurationAdvancedScheduleMonthlyOccurrence(input *automation.AdvancedScheduleMonthlyOccurrence) []interface{} {
 	if input == nil {
-		return results
+		return make([]interface{}, 0)
 	}
 
-	for _, item := range *input {
-		v := make(map[string]interface{})
+	result := make(map[string]interface{})
 
-		v["day"] = string(item.Day)
-		if occurrence := item.Occurrence; occurrence != nil {
-			v["occurrence"] = int(*occurrence)
-		}
-
-		results = append(results, v)
+	result["day"] = string(input.Day)
+	if occurrence := input.Occurrence; occurrence != nil {
+		result["occurrence"] = *occurrence
 	}
 
-	return results
+	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationAzureQueryProperties(input *[]automation.AzureQueryProperties) []interface{} {
-	results := make([]interface{}, 0)
+func flattenArmSoftwareUpdateConfigurationAzureQueryProperties(input *automation.AzureQueryProperties) []interface{} {
 	if input == nil {
-		return results
+		return make([]interface{}, 0)
 	}
 
-	for _, item := range *input {
-		v := make(map[string]interface{})
+	result := make(map[string]interface{})
 
-		v["locations"] = utils.FlattenStringSlice(item.Locations)
-		v["scope"] = utils.FlattenStringSlice(item.Scope)
-
-		results = append(results, v)
+	if locations := input.Locations; locations != nil {
+		result["locations"] = *locations
+	}
+	if scope := input.Scope; scope != nil {
+		result["scope"] = *scope
 	}
 
-	return results
+	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationNonAzureQueryProperties(input *[]automation.NonAzureQueryProperties) []interface{} {
-	results := make([]interface{}, 0)
+func flattenArmSoftwareUpdateConfigurationNonAzureQueryProperties(input *automation.NonAzureQueryProperties) []interface{} {
 	if input == nil {
-		return results
+		return make([]interface{}, 0)
 	}
 
-	for _, item := range *input {
-		v := make(map[string]interface{})
+	result := make(map[string]interface{})
 
-		if functionAlias := item.FunctionAlias; functionAlias != nil {
-			v["function_alias"] = *functionAlias
-		}
-		if workspaceId := item.WorkspaceID; workspaceId != nil {
-			v["workspace_id"] = *workspaceId
-		}
-
-		results = append(results, v)
+	if functionAlias := input.FunctionAlias; functionAlias != nil {
+		result["function_alias"] = *functionAlias
+	}
+	if workspaceId := input.WorkspaceID; workspaceId != nil {
+		result["workspace_id"] = *workspaceId
 	}
 
-	return results
+	return []interface{}{result}
 }

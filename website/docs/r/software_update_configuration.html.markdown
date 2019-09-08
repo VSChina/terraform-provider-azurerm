@@ -24,99 +24,13 @@ description: |-
 Manage Azure SoftwareUpdateConfiguration instance.
 
 
-## Example Usage
-
-```hcl
-resource "azurerm_resource_group" "example" {
-  name     = "example-rg"
-  location = "West US 2"
-}
-
-resource "azurerm_automation_account" "example" {
-  name                = "automationaccount"
-  resource_group_name = "${azurerm_resource_group.example.name}"
-  location            = "${azurerm_resource_group.example.location}"
-  sku_name            = "Basic"
-}
-
-resource "azurerm_log_analytics_workspace" "example" {
-  name                = "acctestLogAnalyticsWS-%d"
-  resource_group_name = "${azurerm_resource_group.example.name}"
-  location            = "${azurerm_resource_group.example.location}"
-  sku                 = "PerGB2018"
-}
-
-resource "azurerm_log_analytics_linked_service" "example" {
-  resource_group_name = "${azurerm_resource_group.example.name}"
-  workspace_name      = "${azurerm_log_analytics_workspace.example.name}"
-  resource_id         = "${azurerm_automation_account.example.id}"
-}
-
-resource "azurerm_virtual_machine" "example" {
-  name                  = "acctestVM-%d"
-  resource_group_name   = "${azurerm_resource_group.example.name}"
-  location              = "${azurerm_resource_group.example.location}"
-  network_interface_ids = ["${azurerm_network_interface.example.id}"]
-  vm_size               = "Standard_DS1_v2"
-
-  storage_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
-    version   = "latest"
-  }
-
-  storage_os_disk {
-    name              = "myosdisk1"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-
-  os_profile {
-    computer_name  = "hostname"
-    admin_username = "testadmin"
-    admin_password = "Password1234!"
-  }
-
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-
-  tags = {
-    environment = "staging"
-  }
-}
-
-resource "azurerm_software_update_configuration" "example" {
-  name                    = "suconfiguration"
-  resource_group_name     = "${azurerm_resource_group.example.name}"
-  automation_account_name = "${azurerm_automation_account.example.name}"
-
-  schedule_info {
-    start_time = "2019-10-24T03:56:08.45Z"
-    time_zone  = "America/Los_Angeles"
-  }
-
-  update_configuration {
-    operating_system       = "Linux"
-    azure_virtual_machines = ["${azurerm_virtual_machine.example.id}"]
-
-    linux {
-      included_package_classifications = "Critical"
-      reboot_setting                   = "IfRequired"
-    }
-  }
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Required) The name of the software update configuration to be created. Changing this forces a new resource to be created.
 
-* `resource_group_name` - (Required) Name of an Azure Resource group. Changing this forces a new resource to be created.
+* `resource_group` - (Required) Name of an Azure Resource group. Changing this forces a new resource to be created.
 
 * `automation_account_name` - (Required) The name of the automation account. Changing this forces a new resource to be created.
 
@@ -161,7 +75,9 @@ The `advanced_schedule` block supports the following:
 
 * `week_days` - (Optional) Days of the week that the job should execute on.
 
-* `monthly_occurrences` - (Optional) One or more `monthly_occurrence` block defined below.
+* `month_days` - (Optional) Days of the month that the job should execute on. Must be between 1 and 31.
+
+* `monthly_occurrences` - (Optional) One `monthly_occurrence` block defined below.
 
 
 ---
@@ -176,7 +92,7 @@ The `monthly_occurrence` block supports the following:
 
 The `update_configuration` block supports the following:
 
-* `operating_system` - (Required) operating system of target machines
+* `operating_system` - (Required) operating system of target machines Defaults to `Windows`.
 
 * `windows` - (Optional) One `window` block defined below.
 
@@ -219,9 +135,9 @@ The `linux` block supports the following:
 
 The `target` block supports the following:
 
-* `azure_queries` - (Optional) One or more `azure_query` block defined below.
+* `azure_queries` - (Optional) One `azure_query` block defined below.
 
-* `non_azure_queries` - (Optional) One or more `non_azure_query` block defined below.
+* `non_azure_queries` - (Optional) One `non_azure_query` block defined below.
 
 
 ---
@@ -283,6 +199,8 @@ The `post_task` block supports the following:
 
 The following attributes are exported:
 
+* `provisioning_state` - Provisioning state for the software update configuration, which only appears in the response.
+
 * `creation_time` - Creation time of the resource, which only appears in the response.
 
 * `created_by` - CreatedBy property, which only appears in the response.
@@ -291,13 +209,8 @@ The following attributes are exported:
 
 * `last_modified_by` - LastModifiedBy property, which only appears in the response.
 
+* `name` - Resource name.
+
 * `id` - Resource Id.
 
-
-## Import
-
-Software Update Configuration can be imported using the `resource id`, e.g.
-
-```shell
-$ terraform import azurerm_software_update_configuration.example /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Automation/automationAccounts//softwareUpdateConfigurations//clientRequestID/
-```
+* `type` - Resource type
