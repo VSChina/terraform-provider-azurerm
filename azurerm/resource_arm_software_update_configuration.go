@@ -449,12 +449,12 @@ func resourceArmSoftwareUpdateConfigurationCreateUpdate(d *schema.ResourceData, 
 	tasks := d.Get("tasks").([]interface{})
 	updateConfiguration := d.Get("update_configuration").([]interface{})
 
-	parameters := automation.softwareUpdateConfiguration{
-		Properties: &automation.softwareUpdateConfigurationProperties{
+	parameters := automation.SoftwareUpdateConfiguration{
+		SoftwareUpdateConfigurationProperties: &automation.SoftwareUpdateConfigurationProperties{
 			Error:               expandArmSoftwareUpdateConfigurationErrorResponse(error),
 			ScheduleInfo:        expandArmSoftwareUpdateConfigurationScheduleProperties(scheduleInfo),
-			Tasks:               expandArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(tasks),
-			UpdateConfiguration: expandArmSoftwareUpdateConfigurationupdateConfiguration(updateConfiguration),
+			Tasks:               expandArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(tasks),
+			UpdateConfiguration: expandArmSoftwareUpdateConfigurationUpdateConfiguration(updateConfiguration),
 		},
 	}
 
@@ -503,22 +503,22 @@ func resourceArmSoftwareUpdateConfigurationRead(d *schema.ResourceData, meta int
 	d.Set("resource_group", resourceGroup)
 	d.Set("automation_account_name", automationAccountName)
 	d.Set("client_request_id", clientRequestID)
-	if properties := resp.Properties; properties != nil {
-		d.Set("created_by", properties.CreatedBy)
-		d.Set("creation_time", (properties.CreationTime).String())
-		if err := d.Set("error", flattenArmSoftwareUpdateConfigurationErrorResponse(properties.Error)); err != nil {
+	if softwareUpdateConfigurationProperties := resp.SoftwareUpdateConfigurationProperties; softwareUpdateConfigurationProperties != nil {
+		d.Set("created_by", softwareUpdateConfigurationProperties.CreatedBy)
+		d.Set("creation_time", (softwareUpdateConfigurationProperties.CreationTime).String())
+		if err := d.Set("error", flattenArmSoftwareUpdateConfigurationErrorResponse(softwareUpdateConfigurationProperties.Error)); err != nil {
 			return fmt.Errorf("Error setting `error`: %+v", err)
 		}
-		d.Set("last_modified_by", properties.LastModifiedBy)
-		d.Set("last_modified_time", (properties.LastModifiedTime).String())
-		d.Set("provisioning_state", properties.ProvisioningState)
-		if err := d.Set("schedule_info", flattenArmSoftwareUpdateConfigurationScheduleProperties(properties.ScheduleInfo)); err != nil {
+		d.Set("last_modified_by", softwareUpdateConfigurationProperties.LastModifiedBy)
+		d.Set("last_modified_time", (softwareUpdateConfigurationProperties.LastModifiedTime).String())
+		d.Set("provisioning_state", softwareUpdateConfigurationProperties.ProvisioningState)
+		if err := d.Set("schedule_info", flattenArmSoftwareUpdateConfigurationScheduleProperties(softwareUpdateConfigurationProperties.ScheduleInfo)); err != nil {
 			return fmt.Errorf("Error setting `schedule_info`: %+v", err)
 		}
-		if err := d.Set("tasks", flattenArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(properties.Tasks)); err != nil {
+		if err := d.Set("tasks", flattenArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(softwareUpdateConfigurationProperties.Tasks)); err != nil {
 			return fmt.Errorf("Error setting `tasks`: %+v", err)
 		}
-		if err := d.Set("update_configuration", flattenArmSoftwareUpdateConfigurationupdateConfiguration(properties.UpdateConfiguration)); err != nil {
+		if err := d.Set("update_configuration", flattenArmSoftwareUpdateConfigurationUpdateConfiguration(softwareUpdateConfigurationProperties.UpdateConfiguration)); err != nil {
 			return fmt.Errorf("Error setting `update_configuration`: %+v", err)
 		}
 	}
@@ -600,7 +600,7 @@ func expandArmSoftwareUpdateConfigurationScheduleProperties(input []interface{})
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(input []interface{}) *automation.softwareUpdateConfigurationTasks {
+func expandArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(input []interface{}) *automation.SoftwareUpdateConfigurationTasks {
 	if len(input) == 0 {
 		return nil
 	}
@@ -609,14 +609,14 @@ func expandArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(input 
 	preTask := v["pre_task"].([]interface{})
 	postTask := v["post_task"].([]interface{})
 
-	result := automation.softwareUpdateConfigurationTasks{
-		PostTask: expandArmSoftwareUpdateConfigurationtaskProperties(postTask),
-		PreTask:  expandArmSoftwareUpdateConfigurationtaskProperties(preTask),
+	result := automation.SoftwareUpdateConfigurationTasks{
+		PostTask: expandArmSoftwareUpdateConfigurationTaskProperties(postTask),
+		PreTask:  expandArmSoftwareUpdateConfigurationTaskProperties(preTask),
 	}
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationupdateConfiguration(input []interface{}) *automation.updateConfiguration {
+func expandArmSoftwareUpdateConfigurationUpdateConfiguration(input []interface{}) *automation.UpdateConfiguration {
 	if len(input) == 0 {
 		return nil
 	}
@@ -630,7 +630,7 @@ func expandArmSoftwareUpdateConfigurationupdateConfiguration(input []interface{}
 	nonAzureComputerNames := v["non_azure_computer_names"].(string)
 	targets := v["targets"].([]interface{})
 
-	result := automation.updateConfiguration{
+	result := automation.UpdateConfiguration{
 		AzureVirtualMachines:  utils.String(azureVirtualMachines),
 		Duration:              utils.String(duration),
 		Linux:                 expandArmSoftwareUpdateConfigurationLinuxProperties(linux),
@@ -675,7 +675,7 @@ func convertStringToDate(input interface{}) *date.Time {
 	return &result
 }
 
-func expandArmSoftwareUpdateConfigurationtaskProperties(input []interface{}) *automation.taskProperties {
+func expandArmSoftwareUpdateConfigurationTaskProperties(input []interface{}) *automation.TaskProperties {
 	if len(input) == 0 {
 		return nil
 	}
@@ -684,7 +684,7 @@ func expandArmSoftwareUpdateConfigurationtaskProperties(input []interface{}) *au
 	parameters := v["parameters"].(map[string]interface{})
 	source := v["source"].(string)
 
-	result := automation.taskProperties{
+	result := automation.TaskProperties{
 		Parameters: utils.ExpandKeyValuePairs(parameters),
 		Source:     utils.String(source),
 	}
@@ -858,20 +858,20 @@ func flattenArmSoftwareUpdateConfigurationScheduleProperties(input *automation.S
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationsoftwareUpdateConfigurationTasks(input *automation.softwareUpdateConfigurationTasks) []interface{} {
+func flattenArmSoftwareUpdateConfigurationSoftwareUpdateConfigurationTasks(input *automation.SoftwareUpdateConfigurationTasks) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
 
 	result := make(map[string]interface{})
 
-	result["post_task"] = flattenArmSoftwareUpdateConfigurationtaskProperties(input.PostTask)
-	result["pre_task"] = flattenArmSoftwareUpdateConfigurationtaskProperties(input.PreTask)
+	result["post_task"] = flattenArmSoftwareUpdateConfigurationTaskProperties(input.PostTask)
+	result["pre_task"] = flattenArmSoftwareUpdateConfigurationTaskProperties(input.PreTask)
 
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationupdateConfiguration(input *automation.updateConfiguration) []interface{} {
+func flattenArmSoftwareUpdateConfigurationUpdateConfiguration(input *automation.UpdateConfiguration) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
@@ -913,7 +913,7 @@ func flattenArmSoftwareUpdateConfigurationAdvancedSchedule(input *automation.Adv
 	return []interface{}{result}
 }
 
-func flattenArmSoftwareUpdateConfigurationtaskProperties(input *automation.taskProperties) []interface{} {
+func flattenArmSoftwareUpdateConfigurationTaskProperties(input *automation.TaskProperties) []interface{} {
 	if input == nil {
 		return make([]interface{}, 0)
 	}
