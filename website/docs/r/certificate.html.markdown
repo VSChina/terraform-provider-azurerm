@@ -28,11 +28,11 @@ Manage Azure Certificate instance.
 
 The following arguments are supported:
 
-* `name` - (Required) The identifier for the certificate. This must be made up of algorithm and thumbprint separated by a dash, and must match the certificate data in the request. For example SHA1-a3d1c5. Changing this forces a new resource to be created.
-
 * `resource_group` - (Required) The name of the resource group that contains the Batch account. Changing this forces a new resource to be created.
 
 * `account_name` - (Required) The name of the Batch account. Changing this forces a new resource to be created.
+
+* `certificate_name` - (Required) The identifier for the certificate. This must be made up of algorithm and thumbprint separated by a dash, and must match the certificate data in the request. For example SHA1-a3d1c5. Changing this forces a new resource to be created.
 
 * `data` - (Required) The maximum size is 10KB.
 

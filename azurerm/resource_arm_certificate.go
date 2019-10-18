@@ -40,16 +40,16 @@ func resourceArmCertificate() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
+			"resource_group": azure.SchemaResourceGroupNameDiffSuppress(),
+
+			"account_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validate.NoEmptyStrings,
 			},
 
-			"resource_group": azure.SchemaResourceGroupNameDiffSuppress(),
-
-			"account_name": {
+			"certificate_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
@@ -180,15 +180,15 @@ func resourceArmCertificateCreate(d *schema.ResourceData, meta interface{}) erro
 	client := meta.(*ArmClient).certificateClient
 	ctx := meta.(*ArmClient).StopContext
 
-	name := d.Get("name").(string)
 	resourceGroup := d.Get("resource_group").(string)
 	accountName := d.Get("account_name").(string)
+	certificateName := d.Get("certificate_name").(string)
 
 	if requireResourcesToBeImported {
-		resp, err := client.Get(ctx, resourceGroup, accountName, name)
+		resp, err := client.Get(ctx, resourceGroup, accountName, certificateName)
 		if err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Error checking for present of existing Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+				return fmt.Errorf("Error checking for present of existing Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 			}
 		}
 		if !utils.ResponseWasNotFound(resp.Response) {
@@ -212,20 +212,20 @@ func resourceArmCertificateCreate(d *schema.ResourceData, meta interface{}) erro
 		},
 	}
 
-	future, err := client.Create(ctx, resourceGroup, accountName, name, parameters)
+	future, err := client.Create(ctx, resourceGroup, accountName, certificateName, parameters)
 	if err != nil {
-		return fmt.Errorf("Error creating Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+		return fmt.Errorf("Error creating Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 	if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
-		return fmt.Errorf("Error waiting for creation of Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+		return fmt.Errorf("Error waiting for creation of Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 
-	resp, err := client.Get(ctx, resourceGroup, accountName, name)
+	resp, err := client.Get(ctx, resourceGroup, accountName, certificateName)
 	if err != nil {
-		return fmt.Errorf("Error retrieving Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+		return fmt.Errorf("Error retrieving Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 	if resp.ID == nil {
-		return fmt.Errorf("Cannot read Certificate %q (Account Name %q / Resource Group %q) ID", name, accountName, resourceGroup)
+		return fmt.Errorf("Cannot read Certificate (Certificate Name %q / Account Name %q / Resource Group %q) ID", certificateName, accountName, resourceGroup)
 	}
 	d.SetId(*resp.ID)
 
@@ -242,21 +242,21 @@ func resourceArmCertificateRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	resourceGroup := id.ResourceGroup
 	accountName := id.Path["batchAccounts"]
-	name := id.Path["certificates"]
+	certificateName := id.Path["certificates"]
 
-	resp, err := client.Get(ctx, resourceGroup, accountName, name)
+	resp, err := client.Get(ctx, resourceGroup, accountName, certificateName)
 	if err != nil {
 		if utils.ResponseWasNotFound(resp.Response) {
 			log.Printf("[INFO] Certificate %q does not exist - removing from state", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("Error reading Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+		return fmt.Errorf("Error reading Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 
-	d.Set("name", name)
 	d.Set("resource_group", resourceGroup)
 	d.Set("account_name", accountName)
+	d.Set("certificate_name", certificateName)
 	if certificateCreateOrUpdateProperties := resp.CertificateCreateOrUpdateProperties; certificateCreateOrUpdateProperties != nil {
 		if err := d.Set("delete_certificate_error", flattenArmCertificateDeleteCertificateError(certificateCreateOrUpdateProperties.DeleteCertificateError)); err != nil {
 			return fmt.Errorf("Error setting `delete_certificate_error`: %+v", err)
@@ -278,9 +278,9 @@ func resourceArmCertificateUpdate(d *schema.ResourceData, meta interface{}) erro
 	client := meta.(*ArmClient).certificateClient
 	ctx := meta.(*ArmClient).StopContext
 
-	name := d.Get("name").(string)
 	resourceGroup := d.Get("resource_group").(string)
 	accountName := d.Get("account_name").(string)
+	certificateName := d.Get("certificate_name").(string)
 	data := d.Get("data").(string)
 	format := d.Get("format").(string)
 	password := d.Get("password").(string)
@@ -297,8 +297,8 @@ func resourceArmCertificateUpdate(d *schema.ResourceData, meta interface{}) erro
 		},
 	}
 
-	if _, err := client.Update(ctx, resourceGroup, accountName, name, parameters); err != nil {
-		return fmt.Errorf("Error updating Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+	if _, err := client.Update(ctx, resourceGroup, accountName, certificateName, parameters); err != nil {
+		return fmt.Errorf("Error updating Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 
 	return resourceArmCertificateRead(d, meta)
@@ -314,19 +314,19 @@ func resourceArmCertificateDelete(d *schema.ResourceData, meta interface{}) erro
 	}
 	resourceGroup := id.ResourceGroup
 	accountName := id.Path["batchAccounts"]
-	name := id.Path["certificates"]
+	certificateName := id.Path["certificates"]
 
-	future, err := client.Delete(ctx, resourceGroup, accountName, name)
+	future, err := client.Delete(ctx, resourceGroup, accountName, certificateName)
 	if err != nil {
 		if response.WasNotFound(future.Response()) {
 			return nil
 		}
-		return fmt.Errorf("Error deleting Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+		return fmt.Errorf("Error deleting Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 	}
 
 	if err = future.WaitForCompletionRef(ctx, client.Client); err != nil {
 		if !response.WasNotFound(future.Response()) {
-			return fmt.Errorf("Error waiting for deleting Certificate %q (Account Name %q / Resource Group %q): %+v", name, accountName, resourceGroup, err)
+			return fmt.Errorf("Error waiting for deleting Certificate (Certificate Name %q / Account Name %q / Resource Group %q): %+v", certificateName, accountName, resourceGroup, err)
 		}
 	}
 
