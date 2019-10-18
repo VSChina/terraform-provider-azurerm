@@ -38,13 +38,6 @@ func resourceArmApplicationPackage() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validate.NoEmptyStrings,
-			},
-
 			"resource_group": azure.SchemaResourceGroupNameDiffSuppress(),
 
 			"account_name": {
@@ -55,6 +48,13 @@ func resourceArmApplicationPackage() *schema.Resource {
 			},
 
 			"application_name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validate.NoEmptyStrings,
+			},
+
+			"version_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
@@ -92,16 +92,16 @@ func resourceArmApplicationPackageCreateUpdate(d *schema.ResourceData, meta inte
 	client := meta.(*ArmClient).applicationPackageClient
 	ctx := meta.(*ArmClient).StopContext
 
-	name := d.Get("name").(string)
 	resourceGroup := d.Get("resource_group").(string)
 	accountName := d.Get("account_name").(string)
 	applicationName := d.Get("application_name").(string)
+	versionName := d.Get("version_name").(string)
 
 	if requireResourcesToBeImported {
-		resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, name)
+		resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, versionName)
 		if err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Error checking for present of existing Application Package %q (Application Name %q / Account Name %q / Resource Group %q): %+v", name, applicationName, accountName, resourceGroup, err)
+				return fmt.Errorf("Error checking for present of existing Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q): %+v", versionName, applicationName, accountName, resourceGroup, err)
 			}
 		}
 		if !utils.ResponseWasNotFound(resp.Response) {
@@ -111,16 +111,16 @@ func resourceArmApplicationPackageCreateUpdate(d *schema.ResourceData, meta inte
 
 	parameters := batch.ApplicationPackage{}
 
-	if _, err := client.Create(ctx, resourceGroup, accountName, applicationName, name, parameters); err != nil {
-		return fmt.Errorf("Error creating Application Package %q (Application Name %q / Account Name %q / Resource Group %q): %+v", name, applicationName, accountName, resourceGroup, err)
+	if _, err := client.Create(ctx, resourceGroup, accountName, applicationName, versionName, parameters); err != nil {
+		return fmt.Errorf("Error creating Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q): %+v", versionName, applicationName, accountName, resourceGroup, err)
 	}
 
-	resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, name)
+	resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, versionName)
 	if err != nil {
-		return fmt.Errorf("Error retrieving Application Package %q (Application Name %q / Account Name %q / Resource Group %q): %+v", name, applicationName, accountName, resourceGroup, err)
+		return fmt.Errorf("Error retrieving Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q): %+v", versionName, applicationName, accountName, resourceGroup, err)
 	}
 	if resp.ID == nil {
-		return fmt.Errorf("Cannot read Application Package %q (Application Name %q / Account Name %q / Resource Group %q) ID", name, applicationName, accountName, resourceGroup)
+		return fmt.Errorf("Cannot read Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q) ID", versionName, applicationName, accountName, resourceGroup)
 	}
 	d.SetId(*resp.ID)
 
@@ -138,19 +138,18 @@ func resourceArmApplicationPackageRead(d *schema.ResourceData, meta interface{})
 	resourceGroup := id.ResourceGroup
 	accountName := id.Path["batchAccounts"]
 	applicationName := id.Path["applications"]
-	name := id.Path["versions"]
+	versionName := id.Path["versions"]
 
-	resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, name)
+	resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, versionName)
 	if err != nil {
 		if utils.ResponseWasNotFound(resp.Response) {
 			log.Printf("[INFO] Application Package %q does not exist - removing from state", d.Id())
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("Error reading Application Package %q (Application Name %q / Account Name %q / Resource Group %q): %+v", name, applicationName, accountName, resourceGroup, err)
+		return fmt.Errorf("Error reading Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q): %+v", versionName, applicationName, accountName, resourceGroup, err)
 	}
 
-	d.Set("name", name)
 	d.Set("resource_group", resourceGroup)
 	d.Set("account_name", accountName)
 	d.Set("application_name", applicationName)
@@ -162,6 +161,7 @@ func resourceArmApplicationPackageRead(d *schema.ResourceData, meta interface{})
 		d.Set("storage_url", applicationPackageProperties.StorageURL)
 		// TODO: SDK Reference /properties/storageUrlExpiry is not supported
 	}
+	d.Set("version_name", versionName)
 
 	return nil
 }
@@ -177,10 +177,10 @@ func resourceArmApplicationPackageDelete(d *schema.ResourceData, meta interface{
 	resourceGroup := id.ResourceGroup
 	accountName := id.Path["batchAccounts"]
 	applicationName := id.Path["applications"]
-	name := id.Path["versions"]
+	versionName := id.Path["versions"]
 
-	if _, err := client.Delete(ctx, resourceGroup, accountName, applicationName, name); err != nil {
-		return fmt.Errorf("Error deleting Application Package %q (Application Name %q / Account Name %q / Resource Group %q): %+v", name, applicationName, accountName, resourceGroup, err)
+	if _, err := client.Delete(ctx, resourceGroup, accountName, applicationName, versionName); err != nil {
+		return fmt.Errorf("Error deleting Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q): %+v", versionName, applicationName, accountName, resourceGroup, err)
 	}
 
 	return nil
