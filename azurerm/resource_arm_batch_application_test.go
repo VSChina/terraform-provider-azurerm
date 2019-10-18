@@ -26,8 +26,8 @@ import (
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/utils"
 )
 
-func TestAccAzureRMBatchAccount_basic(t *testing.T) {
-	resourceName := "azurerm_batch_account.test"
+func TestAccAzureRMBatchApplication_basic(t *testing.T) {
+	resourceName := "azurerm_batch_application.test"
 	ri := tf.AccRandTimeInt()
 	rs := strings.ToLower(acctest.RandString(11))
 	location := testLocation()
@@ -35,14 +35,12 @@ func TestAccAzureRMBatchAccount_basic(t *testing.T) {
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testCheckAzureRMBatchAccountDestroy,
+		CheckDestroy: testCheckAzureRMBatchApplicationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzureRMBatchAccount_basic(ri, rs, location),
+				Config: testAccAzureRMBatchApplication_basic(ri, rs, location),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckAzureRMBatchAccountExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "pool_allocation_mode", "BatchService"),
-					resource.TestCheckResourceAttrSet(resourceName, "storage_account_id"),
+					testCheckAzureRMBatchApplicationExists(resourceName),
 				),
 			},
 			{
@@ -54,45 +52,47 @@ func TestAccAzureRMBatchAccount_basic(t *testing.T) {
 	})
 }
 
-func testCheckAzureRMBatchAccountExists(resourceName string) resource.TestCheckFunc {
+func testCheckAzureRMBatchApplicationExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Batch Account not found: %s", resourceName)
+			return fmt.Errorf("Batch Application not found: %s", resourceName)
 		}
 
 		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group_name"]
+		accountName := rs.Primary.Attributes["account_name"]
 
-		client := testAccProvider.Meta().(*ArmClient).batchAccountClient
+		client := testAccProvider.Meta().(*ArmClient).batchApplicationClient
 		ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
-		if resp, err := client.Get(ctx, resourceGroup, name); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Batch Account %q (Resource Group %q) does not exist", name, resourceGroup)
+				return fmt.Errorf("Bad: Batch Application %q (Account Name %q / Resource Group %q) does not exist", name, accountName, resourceGroup)
 			}
-			return fmt.Errorf("Bad: Get on batchAccountClient: %+v", err)
+			return fmt.Errorf("Bad: Get on batchApplicationClient: %+v", err)
 		}
 
 		return nil
 	}
 }
 
-func testCheckAzureRMBatchAccountDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*ArmClient).batchAccountClient
+func testCheckAzureRMBatchApplicationDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*ArmClient).batchApplicationClient
 	ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "azurerm_batch_account" {
+		if rs.Type != "azurerm_batch_application" {
 			continue
 		}
 
 		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group_name"]
+		accountName := rs.Primary.Attributes["account_name"]
 
-		if resp, err := client.Get(ctx, resourceGroup, name); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Get on batchAccountClient: %+v", err)
+				return fmt.Errorf("Bad: Get on batchApplicationClient: %+v", err)
 			}
 		}
 
@@ -102,7 +102,7 @@ func testCheckAzureRMBatchAccountDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccAzureRMBatchAccount_basic(rInt int, rString string, location string) string {
+func testAccAzureRMBatchApplication_basic(rInt int, rString string, location string) string {
 	return fmt.Sprintf(`
 resource "azurerm_resource_group" "test" {
   name     = "acctestRG-%d"
@@ -124,5 +124,11 @@ resource "azurerm_batch_account" "test" {
   pool_allocation_mode = "BatchService"
   storage_account_id   = "${azurerm_storage_account.test.id}"
 }
-`, rInt, location, rString, rString)
+
+resource "azurerm_batch_application" "test" {
+  name                = "acctestbatchapp-%d"
+  resource_group_name = "${azurerm_resource_group.test.name}"
+  account_name        = "${azurerm_batch_account.test.name}"
+}
+`, rInt, location, rString, rString, rInt)
 }

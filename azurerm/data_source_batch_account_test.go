@@ -16,8 +16,10 @@ package azurerm
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 )
@@ -26,24 +28,25 @@ func TestAccDataSourceAzureRMBatchAccount_basic(t *testing.T) {
 	dataSourceName := "data.azurerm_batch_account.test"
 	ri := tf.AccRandTimeInt()
 	location := testLocation()
+	rs := strings.ToLower(acctest.RandString(11))
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceBatchAccount_basic(ri, location),
+				Config: testAccDataSourceBatchAccount_basic(ri, location, rs),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(dataSourceName, "poolAllocationMode", "BatchService"),
-					resource.TestCheckResourceAttrSet(dataSourceName, "storageAccountId"),
+					resource.TestCheckResourceAttr(dataSourceName, "pool_allocation_mode", "BatchService"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "storage_account_id"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceBatchAccount_basic(rInt int, location string) string {
-	config := testAccAzureRMBatchAccount_basic(rInt, location)
+func testAccDataSourceBatchAccount_basic(rInt int, location string, rString string) string {
+	config := testAccAzureRMBatchAccount_basic(rInt, location, rString)
 	return fmt.Sprintf(`
 %s
 
