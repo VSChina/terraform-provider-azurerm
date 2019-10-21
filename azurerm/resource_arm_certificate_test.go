@@ -29,16 +29,16 @@ func testCheckAzureRMCertificateExists(resourceName string) resource.TestCheckFu
 			return fmt.Errorf("Certificate not found: %s", resourceName)
 		}
 
+		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group"]
 		accountName := rs.Primary.Attributes["account_name"]
-		certificateName := rs.Primary.Attributes["certificate_name"]
 
 		client := testAccProvider.Meta().(*ArmClient).certificateClient
 		ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
-		if resp, err := client.Get(ctx, resourceGroup, accountName, certificateName); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Certificate (Certificate Name %q / Account Name %q / Resource Group %q) does not exist", certificateName, accountName, resourceGroup)
+				return fmt.Errorf("Bad: Certificate %q (Account Name %q / Resource Group %q) does not exist", name, accountName, resourceGroup)
 			}
 			return fmt.Errorf("Bad: Get on certificateClient: %+v", err)
 		}
@@ -56,11 +56,11 @@ func testCheckAzureRMCertificateDestroy(s *terraform.State) error {
 			continue
 		}
 
+		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group"]
 		accountName := rs.Primary.Attributes["account_name"]
-		certificateName := rs.Primary.Attributes["certificate_name"]
 
-		if resp, err := client.Get(ctx, resourceGroup, accountName, certificateName); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, name); err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
 				return fmt.Errorf("Bad: Get on certificateClient: %+v", err)
 			}
