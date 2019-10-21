@@ -29,17 +29,17 @@ func testCheckAzureRMApplicationPackageExists(resourceName string) resource.Test
 			return fmt.Errorf("Application Package not found: %s", resourceName)
 		}
 
+		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group"]
 		accountName := rs.Primary.Attributes["account_name"]
 		applicationName := rs.Primary.Attributes["application_name"]
-		versionName := rs.Primary.Attributes["version_name"]
 
 		client := testAccProvider.Meta().(*ArmClient).applicationPackageClient
 		ctx := testAccProvider.Meta().(*ArmClient).StopContext
 
-		if resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, versionName); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, name); err != nil {
 			if utils.ResponseWasNotFound(resp.Response) {
-				return fmt.Errorf("Bad: Application Package (Version Name %q / Application Name %q / Account Name %q / Resource Group %q) does not exist", versionName, applicationName, accountName, resourceGroup)
+				return fmt.Errorf("Bad: Application Package %q (Application Name %q / Account Name %q / Resource Group %q) does not exist", name, applicationName, accountName, resourceGroup)
 			}
 			return fmt.Errorf("Bad: Get on applicationPackageClient: %+v", err)
 		}
@@ -57,12 +57,12 @@ func testCheckAzureRMApplicationPackageDestroy(s *terraform.State) error {
 			continue
 		}
 
+		name := rs.Primary.Attributes["name"]
 		resourceGroup := rs.Primary.Attributes["resource_group"]
 		accountName := rs.Primary.Attributes["account_name"]
 		applicationName := rs.Primary.Attributes["application_name"]
-		versionName := rs.Primary.Attributes["version_name"]
 
-		if resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, versionName); err != nil {
+		if resp, err := client.Get(ctx, resourceGroup, accountName, applicationName, name); err != nil {
 			if !utils.ResponseWasNotFound(resp.Response) {
 				return fmt.Errorf("Bad: Get on applicationPackageClient: %+v", err)
 			}

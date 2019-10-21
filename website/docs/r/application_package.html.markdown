@@ -28,13 +28,13 @@ Manage Azure ApplicationPackage instance.
 
 The following arguments are supported:
 
+* `name` - (Required) The version of the application. Changing this forces a new resource to be created.
+
 * `resource_group` - (Required) The name of the resource group that contains the Batch account. Changing this forces a new resource to be created.
 
 * `account_name` - (Required) The name of the Batch account. Changing this forces a new resource to be created.
 
 * `application_name` - (Required) The name of the application. This must be unique within the account. Changing this forces a new resource to be created.
-
-* `version_name` - (Required) The version of the application. Changing this forces a new resource to be created.
 
 ## Attributes Reference
 
